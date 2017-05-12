@@ -3,7 +3,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2017, Erik Moqvist
+ * Copyright (c) 2016, Erik Moqvist
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -177,6 +177,7 @@ static mp_obj_t class_ssl_context_load_verify_locations(size_t n_args,
     return (mp_const_none);
 }
 
+																	
 static mp_obj_t class_ssl_context_set_verify_mode(mp_obj_t self_in,
                                                   mp_obj_t mode_in)
 {
@@ -263,7 +264,36 @@ static mp_obj_t class_ssl_context_wrap_socket(size_t n_args,
 
     return (MP_OBJ_FROM_PTR(ssl_sock_p));
 }
+#define CERT_BUF_SIZE 4096
+static mp_obj_t class_ssl_context_create_private_key(size_t n_args,
+																										const mp_obj_t *pos_args_p,
+																										mp_map_t *kw_args_p)
+{
+		
+	/*
+		we ignore parameters for now; will implement ASAP key generation with params 
+	*/
+	int argc = 0; 
+	char **argv = m_malloc ( argc * sizeof(char*));
+	
+	//unsigned char output_buf[1024]; //DON'T JUDGE, WE NEED IT BIG, OK?!
+	//unsigned char output_buf[1024]; //DON'T JUDGE, WE NEED IT BIG, OK?!
+	/* Create the three-tuple. */
+	unsigned char cert_buf[CERT_BUF_SIZE];
+	unsigned char output_buf[1024];
+	memset(output_buf, 0, 1024);
+	memset(cert_buf, 0, CERT_BUF_SIZE);
+	mp_obj_tuple_t *tuple_p;
+	tuple_p = MP_OBJ_TO_PTR(mp_obj_new_tuple(4, NULL));
+	int key_len=0, cert_len=0; 
+	ssl_context_create_private_key(argc,argv,output_buf,cert_buf, &key_len, &cert_len);
+	tuple_p->items[0] = mp_obj_new_int(key_len); 
+	tuple_p->items[1] = mp_obj_new_str((const char*) output_buf, key_len, false);
+	tuple_p->items[2] = mp_obj_new_int(cert_len); 
+	tuple_p->items[3] = mp_obj_new_str((const char*) cert_buf, cert_len, false);
+	return (MP_OBJ_FROM_PTR(tuple_p));
 
+}
 static MP_DEFINE_CONST_FUN_OBJ_KW(class_ssl_context_load_cert_chain_obj,
                                   2,
                                   class_ssl_context_load_cert_chain);
@@ -275,7 +305,10 @@ static MP_DEFINE_CONST_FUN_OBJ_2(class_ssl_context_set_verify_mode_obj,
 static MP_DEFINE_CONST_FUN_OBJ_KW(class_ssl_context_wrap_socket_obj,
                                   1,
                                   class_ssl_context_wrap_socket);
-
+static MP_DEFINE_CONST_FUN_OBJ_KW(class_ssl_context_create_private_key_obj,
+                                  1,
+                                  class_ssl_context_create_private_key);
+																	
 static const mp_rom_map_elem_t class_ssl_context_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_load_cert_chain),
       MP_ROM_PTR(&class_ssl_context_load_cert_chain_obj) },
@@ -284,7 +317,9 @@ static const mp_rom_map_elem_t class_ssl_context_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_verify_mode),
       MP_ROM_PTR(&class_ssl_context_set_verify_mode_obj) },
     { MP_ROM_QSTR(MP_QSTR_wrap_socket),
-      MP_ROM_PTR(&class_ssl_context_wrap_socket_obj) }
+      MP_ROM_PTR(&class_ssl_context_wrap_socket_obj) },
+		{ MP_ROM_QSTR(MP_QSTR_create_private_key),
+      MP_ROM_PTR(&class_ssl_context_create_private_key_obj) }
 };
 
 static MP_DEFINE_CONST_DICT(class_ssl_context_locals_dict,
