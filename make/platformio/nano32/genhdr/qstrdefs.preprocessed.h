@@ -2395,3 +2395,5 @@ Q(zip)
 Q(zip)
 
 Q(zlib)
+
+Q(create_private_key)
