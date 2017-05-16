@@ -264,7 +264,7 @@ static mp_obj_t class_ssl_context_wrap_socket(size_t n_args,
 
     return (MP_OBJ_FROM_PTR(ssl_sock_p));
 }
-#define CERT_BUF_SIZE 4096
+#define CERT_BUF_SIZE 1024
 static mp_obj_t class_ssl_context_create_private_key(size_t n_args,
 																										const mp_obj_t *pos_args_p,
 																										mp_map_t *kw_args_p)
